@@ -1,0 +1,59 @@
+services:
+  mosquitto:
+    container_name: mqtt-broker
+    image: eclipse-mosquitto:2.0.15
+    restart: always
+    ports:
+      - "1883:1883"
+    networks:
+      - mqtt
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '10'
+
+  xstorage2mqtt:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: ostrich2mqtt
+    image: meriadoc/ostrich2mqtt
+    restart: always
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL}
+      - EATON_URL=${EATON_URL}
+      - MQTT_URL=${MQTT_URL}
+    depends_on:
+      - mosquitto
+    networks:
+      - mqtt
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '10'
+
+  madoka2mqtt:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: madoka2mqtt
+    image: meriadoc/madoka2mqtt
+    restart: always
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL}
+      - MADOKA_URL=${MADOKA_URL}
+      - MQTT_URL=${MQTT_URL}
+    depends_on:
+      - mosquitto
+    networks:
+      - mqtt
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '10'
+
+networks:
+  mqtt:
